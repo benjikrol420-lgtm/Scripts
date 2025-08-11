@@ -1,0 +1,264 @@
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Window = Rayfield:CreateWindow({
+    Name = "Plasma Hub",
+    Icon = 0,
+    LoadingTitle = "Plasma Hub",
+    LoadingSubtitle = "by Plasma",
+    ShowText = "Rayfield",
+    Theme = "Default",
+    ToggleUIKeybind = "K",
+    DisableRayfieldPrompts = false,
+    DisableBuildWarnings = false
+})
+
+local PlayerTab = Window:CreateTab("Main", 4483362458)
+
+
+
+local autoClick = false
+local currentArg = nil -- to store the dynamic arg
+
+-- Function to update currentArg
+local function updateArg()
+    -- Try to get it from somewhere reliable
+    -- This is an example, adjust to your game:
+    local success, value = pcall(function()
+        return game.Players.LocalPlayer:WaitForChild("OreExtractorID", 1).Value
+    end)
+    if success then
+        currentArg = value
+    else
+        currentArg = 1 -- fallback default
+    end
+end
+
+local autoClick = false
+
+PlayerTab:CreateToggle({
+    Name = "Auto Click Ore Extractor (Leave and Rejoin until it works.)",
+    CurrentValue = false,
+    Flag = "AutoClickToggle",
+    Callback = function(Value)
+        autoClick = Value
+
+        if autoClick then
+            task.spawn(function()
+                while autoClick do
+                    local args = {1}  -- Change this to 1, 2, or 3 depending on your current session
+                    game:GetService("ReplicatedStorage")
+                        :WaitForChild("Izc")
+                        :WaitForChild("Events")
+                        :WaitForChild("RE")
+                        :WaitForChild("oreExtractorClick")
+                        :FireServer(unpack(args))
+                    task.wait(0.1)
+                end
+            end)
+        end
+    end,
+})
+
+
+
+
+
+-- === AUTO UPGRADE ORE EXTRACTOR TOGGLE ===
+PlayerTab:CreateToggle({
+    Name = "Auto Upgrade Ore Extractor",
+    CurrentValue = false,
+    Flag = "AutoUpgradeOreToggle",
+    Callback = function(Value)
+        autoUpgradeOre = Value
+
+        if autoUpgradeOre and not autoUpgradeOreThread then
+            autoUpgradeOreThread = task.spawn(function()
+                while autoUpgradeOre do
+                    local success, err = pcall(function()
+                        game:GetService("ReplicatedStorage")
+                            :WaitForChild("Izc")
+                            :WaitForChild("Events")
+                            :WaitForChild("RE")
+                            :WaitForChild("upgrade")
+                            :FireServer("oreExtractor")
+                    end)
+
+                    if not success then
+                        warn("[AutoUpgradeOre] Error:", err)
+                    end
+
+                    task.wait(1)
+                end
+                autoUpgradeOreThread = nil
+            end)
+        end
+    end,
+})
+
+
+PlayerTab:CreateDivider("Minion Upgrades")
+
+
+-- === AUTO UPGRADE MINION FORTUNE TOGGLE ===
+PlayerTab:CreateToggle({
+    Name = "Auto Upgrade Minion Fortune",
+    CurrentValue = false,
+    Flag = "AutoUpgradeMinionToggle",
+    Callback = function(Value)
+        autoUpgradeMinion = Value
+
+        if autoUpgradeMinion and not autoUpgradeMinionThread then
+            autoUpgradeMinionThread = task.spawn(function()
+                while autoUpgradeMinion do
+                    local success, err = pcall(function()
+                        game:GetService("ReplicatedStorage")
+                            :WaitForChild("Izc")
+                            :WaitForChild("Events")
+                            :WaitForChild("RE")
+                            :WaitForChild("upgrade")
+                            :FireServer("minionsMultiplier")
+                    end)
+
+                    if not success then
+                        warn("[AutoUpgradeMinion] Error:", err)
+                    end
+
+                    task.wait(1)
+                end
+                autoUpgradeMinionThread = nil
+            end)
+        end
+    end,
+})
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local upgradeEvent = ReplicatedStorage:WaitForChild("Izc")
+    :WaitForChild("Events")
+    :WaitForChild("RE")
+    :WaitForChild("upgrade")
+
+local autoUpgrade = false
+local upgradeThread = nil
+
+PlayerTab:CreateToggle({
+    Name = "Auto Upgrade Minion Limit",
+    Flag = "AutoUpgradeMinionLimit",
+    Callback = function(state)
+        autoUpgrade = state
+        if autoUpgrade then
+            print("[AutoUpgrade] Started upgrading minion limit")
+            upgradeThread = task.spawn(function()
+                while autoUpgrade do
+                    local success, err = pcall(function()
+                        upgradeEvent:FireServer("minionsMax")
+                    end)
+                    if not success then
+                        warn("[AutoUpgrade] Error upgrading:", err)
+                    end
+                    task.wait(1)  -- Adjust delay if needed
+                end
+                print("[AutoUpgrade] Stopped upgrading minion limit")
+            end)
+        else
+            print("[AutoUpgrade] Toggle turned off, stopping upgrade")
+        end
+    end,
+})
+
+
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local upgradeEvent = ReplicatedStorage:WaitForChild("Izc")
+    :WaitForChild("Events")
+    :WaitForChild("RE")
+    :WaitForChild("upgrade")
+
+local autoHaste = false
+
+PlayerTab:CreateToggle({
+    Name = "Auto Upgrade Minion Haste",
+    Flag = "AutoUpgradeMinionHaste",
+    Callback = function(state)
+        autoHaste = state
+        if autoHaste then
+            print("[AutoUpgrade] Started upgrading minion haste")
+            task.spawn(function()
+                while autoHaste do
+                    local success, err = pcall(function()
+                        upgradeEvent:FireServer("minionsTime")
+                    end)
+                    if not success then
+                        warn("[AutoUpgrade] Error:", err)
+                    end
+                    task.wait(1) -- Change delay if you want faster/slower upgrades
+                end
+                print("[AutoUpgrade] Stopped upgrading minion haste")
+            end)
+        else
+            print("[AutoUpgrade] Toggle turned off")
+        end
+    end,
+})
+
+
+
+PlayerTab:CreateDivider("Misc")
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local autoTrashCan = false
+local prompt = nil
+
+-- Detect player's plot's ProximityPrompt safely
+for _, plot in pairs(workspace.Game.Plots:GetChildren()) do
+    if plot:FindFirstChild("Owner") and plot.Owner.Value == LocalPlayer then
+        for _, desc in pairs(plot:GetDescendants()) do
+            if desc:IsA("ProximityPrompt") then
+                prompt = desc
+                break
+            end
+        end
+        break
+    end
+end
+
+local success, err = pcall(function()
+    PlayerTab:CreateToggle({
+        Name = "Auto Use Trash Can",
+        Flag = "AutoTrashCan",
+        Callback = function(state)
+            autoTrashCan = state
+            if autoTrashCan then
+                print("[TrashCan] Enabled")
+                task.spawn(function()
+                    while autoTrashCan do
+                        if prompt and prompt:IsA("ProximityPrompt") and prompt.Enabled then
+                            local char = LocalPlayer.Character
+                            local hrp = char and char:FindFirstChild("HumanoidRootPart")
+                            if hrp and prompt.Parent and prompt.Parent:IsA("BasePart") then
+                                local dist = (prompt.Parent.Position - hrp.Position).Magnitude
+                                if dist <= prompt.MaxActivationDistance then
+                                    pcall(function()
+                                        fireproximityprompt(prompt, 0)
+                                    end)
+                                end
+                            end
+                        end
+                        task.wait(0.3)
+                    end
+                    print("[TrashCan] Disabled")
+                end)
+            else
+                print("[TrashCan] Disabled")
+            end
+        end,
+    })
+end)
+
+if not success then
+    warn("Error creating Auto Use Trash Can toggle:", err)
+end
+
+
+

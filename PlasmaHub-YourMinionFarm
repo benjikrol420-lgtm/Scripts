@@ -1,9 +1,9 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-    Name = "Plasma Hub",
+    Name = "Plazma Hub",
     Icon = 0,
-    LoadingTitle = "Plasma Hub",
+    LoadingTitle = "Plazma Hub",
     LoadingSubtitle = "by Plasma",
     ShowText = "Rayfield",
     Theme = "Amethyst",

@@ -1,57 +1,37 @@
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
-
-local Window = Rayfield:CreateWindow({
-    Name = "Plazma Hub",
-    Icon = 0,
-    LoadingTitle = "Plazma Hub",
-    LoadingSubtitle = "by Plasma",
-    ShowText = "Rayfield",
-    Theme = "Amethyst",
-    ToggleUIKeybind = "K",
-    DisableRayfieldPrompts = false,
-    DisableBuildWarnings = false
+local r=loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+local w=r:CreateWindow({
+    Name="Plazma Hub",Icon=0,
+    LoadingTitle="Plazma Hub",
+    LoadingSubtitle="by Plasma",
+    ShowText="Rayfield",
+    Theme="Amethyst",
+    ToggleUIKeybind="K",
+    DisableRayfieldPrompts=false,
+    DisableBuildWarnings=false
 })
+local t=w:CreateTab("Main",4483362458)
 
-local PlayerTab = Window:CreateTab("Main", 4483362458)
+local a=false
+local c=nil
 
-
-
-local autoClick = false
-local currentArg = nil -- to store the dynamic arg
-
--- Function to update currentArg
-local function updateArg()
-    -- Try to get it from somewhere reliable
-    -- This is an example, adjust to your game:
-    local success, value = pcall(function()
-        return game.Players.LocalPlayer:WaitForChild("OreExtractorID", 1).Value
+local function u()
+    local s,v=pcall(function()
+        return game.Players.LocalPlayer:WaitForChild("OreExtractorID",1).Value
     end)
-    if success then
-        currentArg = value
-    else
-        currentArg = 1 -- fallback default
-    end
+    if s then c=v else c=1 end
 end
 
-local autoClick = false
-
-PlayerTab:CreateToggle({
-    Name = "Auto Click Ore Extractor (Leave and Rejoin until it works.)",
-    CurrentValue = false,
-    Flag = "AutoClickToggle",
-    Callback = function(Value)
-        autoClick = Value
-
-        if autoClick then
+t:CreateToggle({
+    Name="Auto Click Ore Extractor (Leave and Rejoin until it works.)",
+    CurrentValue=false,
+    Flag="AutoClickToggle",
+    Callback=function(v)
+        a=v
+        if a then
             task.spawn(function()
-                while autoClick do
-                    local args = {1}  -- Change this to 1, 2, or 3 depending on your current session
-                    game:GetService("ReplicatedStorage")
-                        :WaitForChild("Izc")
-                        :WaitForChild("Events")
-                        :WaitForChild("RE")
-                        :WaitForChild("oreExtractorClick")
-                        :FireServer(unpack(args))
+                while a do
+                    local args={1}
+                    game:GetService("ReplicatedStorage"):WaitForChild("Izc"):WaitForChild("Events"):WaitForChild("RE"):WaitForChild("oreExtractorClick"):FireServer(unpack(args))
                     task.wait(0.1)
                 end
             end)
@@ -59,103 +39,76 @@ PlayerTab:CreateToggle({
     end,
 })
 
+local b=false
+local f=nil
 
-
-
-
--- === AUTO UPGRADE ORE EXTRACTOR TOGGLE ===
-PlayerTab:CreateToggle({
-    Name = "Auto Upgrade Ore Extractor",
-    CurrentValue = false,
-    Flag = "AutoUpgradeOreToggle",
-    Callback = function(Value)
-        autoUpgradeOre = Value
-
-        if autoUpgradeOre and not autoUpgradeOreThread then
-            autoUpgradeOreThread = task.spawn(function()
-                while autoUpgradeOre do
-                    local success, err = pcall(function()
-                        game:GetService("ReplicatedStorage")
-                            :WaitForChild("Izc")
-                            :WaitForChild("Events")
-                            :WaitForChild("RE")
-                            :WaitForChild("upgrade")
-                            :FireServer("oreExtractor")
+t:CreateToggle({
+    Name="Auto Upgrade Ore Extractor",
+    CurrentValue=false,
+    Flag="AutoUpgradeOreToggle",
+    Callback=function(v)
+        b=v
+        if b and not f then
+            f=task.spawn(function()
+                while b do
+                    local s,e=pcall(function()
+                        game:GetService("ReplicatedStorage"):WaitForChild("Izc"):WaitForChild("Events"):WaitForChild("RE"):WaitForChild("upgrade"):FireServer("oreExtractor")
                     end)
-
-                    if not success then
-                        warn("[AutoUpgradeOre] Error:", err)
-                    end
-
+                    if not s then warn("[AutoUpgradeOre] Error:",e) end
                     task.wait(1)
                 end
-                autoUpgradeOreThread = nil
+                f=nil
             end)
         end
     end,
 })
 
+t:CreateDivider("Minion Upgrades")
 
-PlayerTab:CreateDivider("Minion Upgrades")
+local g=false
+local h=nil
 
-
--- === AUTO UPGRADE MINION FORTUNE TOGGLE ===
-PlayerTab:CreateToggle({
-    Name = "Auto Upgrade Minion Fortune",
-    CurrentValue = false,
-    Flag = "AutoUpgradeMinionToggle",
-    Callback = function(Value)
-        autoUpgradeMinion = Value
-
-        if autoUpgradeMinion and not autoUpgradeMinionThread then
-            autoUpgradeMinionThread = task.spawn(function()
-                while autoUpgradeMinion do
-                    local success, err = pcall(function()
-                        game:GetService("ReplicatedStorage")
-                            :WaitForChild("Izc")
-                            :WaitForChild("Events")
-                            :WaitForChild("RE")
-                            :WaitForChild("upgrade")
-                            :FireServer("minionsMultiplier")
+t:CreateToggle({
+    Name="Auto Upgrade Minion Fortune",
+    CurrentValue=false,
+    Flag="AutoUpgradeMinionToggle",
+    Callback=function(v)
+        g=v
+        if g and not h then
+            h=task.spawn(function()
+                while g do
+                    local s,e=pcall(function()
+                        game:GetService("ReplicatedStorage"):WaitForChild("Izc"):WaitForChild("Events"):WaitForChild("RE"):WaitForChild("upgrade"):FireServer("minionsMultiplier")
                     end)
-
-                    if not success then
-                        warn("[AutoUpgradeMinion] Error:", err)
-                    end
-
+                    if not s then warn("[AutoUpgradeMinion] Error:",e) end
                     task.wait(1)
                 end
-                autoUpgradeMinionThread = nil
+                h=nil
             end)
         end
     end,
 })
 
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local upgradeEvent = ReplicatedStorage:WaitForChild("Izc")
-    :WaitForChild("Events")
-    :WaitForChild("RE")
-    :WaitForChild("upgrade")
+local rs=game:GetService("ReplicatedStorage")
+local up=rs:WaitForChild("Izc"):WaitForChild("Events"):WaitForChild("RE"):WaitForChild("upgrade")
 
-local autoUpgrade = false
-local upgradeThread = nil
+local d=false
+local p=nil
 
-PlayerTab:CreateToggle({
-    Name = "Auto Upgrade Minion Limit",
-    Flag = "AutoUpgradeMinionLimit",
-    Callback = function(state)
-        autoUpgrade = state
-        if autoUpgrade then
+t:CreateToggle({
+    Name="Auto Upgrade Minion Limit",
+    Flag="AutoUpgradeMinionLimit",
+    Callback=function(s)
+        d=s
+        if d then
             print("[AutoUpgrade] Started upgrading minion limit")
-            upgradeThread = task.spawn(function()
-                while autoUpgrade do
-                    local success, err = pcall(function()
-                        upgradeEvent:FireServer("minionsMax")
+            p=task.spawn(function()
+                while d do
+                    local ok,er=pcall(function()
+                        up:FireServer("minionsMax")
                     end)
-                    if not success then
-                        warn("[AutoUpgrade] Error upgrading:", err)
-                    end
-                    task.wait(1)  -- Adjust delay if needed
+                    if not ok then warn("[AutoUpgrade] Error upgrading:",er) end
+                    task.wait(1)
                 end
                 print("[AutoUpgrade] Stopped upgrading minion limit")
             end)
@@ -165,32 +118,22 @@ PlayerTab:CreateToggle({
     end,
 })
 
+local j=false
 
-
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local upgradeEvent = ReplicatedStorage:WaitForChild("Izc")
-    :WaitForChild("Events")
-    :WaitForChild("RE")
-    :WaitForChild("upgrade")
-
-local autoHaste = false
-
-PlayerTab:CreateToggle({
-    Name = "Auto Upgrade Minion Haste",
-    Flag = "AutoUpgradeMinionHaste",
-    Callback = function(state)
-        autoHaste = state
-        if autoHaste then
+t:CreateToggle({
+    Name="Auto Upgrade Minion Haste",
+    Flag="AutoUpgradeMinionHaste",
+    Callback=function(s)
+        j=s
+        if j then
             print("[AutoUpgrade] Started upgrading minion haste")
             task.spawn(function()
-                while autoHaste do
-                    local success, err = pcall(function()
-                        upgradeEvent:FireServer("minionsTime")
+                while j do
+                    local ok,er=pcall(function()
+                        up:FireServer("minionsTime")
                     end)
-                    if not success then
-                        warn("[AutoUpgrade] Error:", err)
-                    end
-                    task.wait(1) -- Change delay if you want faster/slower upgrades
+                    if not ok then warn("[AutoUpgrade] Error:",er) end
+                    task.wait(1)
                 end
                 print("[AutoUpgrade] Stopped upgrading minion haste")
             end)
@@ -200,79 +143,35 @@ PlayerTab:CreateToggle({
     end,
 })
 
+local tp=w:CreateTab("Teleports",4483362458)
 
-
-
-
-local PlayerTab = Window:CreateTab("Teleports", 4483362458)
-
-
--- Define the new CFrame you provided
-local teleportCFrame = CFrame.new(
-    -31.3058033, 2.69999909, -66.6991425,  -- Position (X, Y, Z)
-    0.0523356013, -2.94071945e-09, 0.99862957,   -- LookAt vector (X, Y, Z)
-    1.90132017e-08, 1, 1.94832217e-09,           -- LookAt vector (X, Y, Z)
-    -0.99862957, 1.88851796e-08, 0.0523356013    -- LookAt vector (X, Y, Z)
-)
-
-
--- Create a button inside your window
-PlayerTab:CreateButton({
-    Name = "Teleport to Ore Shop", -- Button name
-    Callback = function()
-        local player = game.Players.LocalPlayer
-        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            -- Teleport the player to the defined CFrame
-            player.Character.HumanoidRootPart.CFrame = teleportCFrame
+local function makeTPBtn(name,x,y,z,lookAt)
+    local cf=CFrame.new(x,y,z,unpack(lookAt))
+    tp:CreateButton({
+        Name=name,
+        Callback=function()
+            local pl=game.Players.LocalPlayer
+            if pl.Character and pl.Character:FindFirstChild("HumanoidRootPart") then
+                pl.Character.HumanoidRootPart.CFrame=cf
+            end
         end
-    end
+    })
+end
+
+makeTPBtn("Teleport to Ore Shop",-31.3058033,2.69999909,-66.6991425,{
+    0.0523356013,-2.94071945e-09,0.99862957,
+    1.90132017e-08,1,1.94832217e-09,
+    -0.99862957,1.88851796e-08,0.0523356013
 })
 
--- Define the new CFrame you provided
-local teleportCFrame = CFrame.new(
-    -31.2493916, 2.69999909, -82.3654175,  -- Position (X, Y, Z)
-    0.0148223359, -1.28084039e-07, 0.999890149,  -- LookAt vector (X, Y, Z)
-    -1.69303984e-08, 1, 1.283491e-07,  -- LookAt vector (X, Y, Z)
-    -0.999890149, -1.88309723e-08, 0.0148223359  -- LookAt vector (X, Y, Z)
-)
-
--- Create a button inside your PlayerTab window
-PlayerTab:CreateButton({
-    Name = "Teleport to Minion Shop",  -- Button name
-    Callback = function()
-        local player = game.Players.LocalPlayer
-        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            -- Teleport the player to the defined CFrame
-            player.Character.HumanoidRootPart.CFrame = teleportCFrame
-        end
-    end
+makeTPBtn("Teleport to Minion Shop",-31.2493916,2.69999909,-82.3654175,{
+    0.0148223359,-1.28084039e-07,0.999890149,
+    -1.69303984e-08,1,1.283491e-07,
+    -0.999890149,-1.88309723e-08,0.0148223359
 })
 
-
-
-
-PlayerTab:CreateDivider("Extra")
-
-
-
--- Define the new CFrame you provided
-local teleportCFrame = CFrame.new(
-    230.116302, 2.69999909, -75.8902664,  -- Position (X, Y, Z)
-    -0.00973738823, -2.36319622e-08, -0.999952614,  -- LookAt vector (X, Y, Z)
-    -4.74597783e-09, 1, -2.35868676e-08,  -- LookAt vector (X, Y, Z)
-    0.999952614, 4.51607862e-09, -0.00973738823  -- LookAt vector (X, Y, Z)
-)
-
--- Create a button inside your PlayerTab window
-PlayerTab:CreateButton({
-    Name = "Teleport to Leaderboards",  -- Button name
-    Callback = function()
-        local player = game.Players.LocalPlayer
-        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            -- Teleport the player to the defined CFrame
-            player.Character.HumanoidRootPart.CFrame = teleportCFrame
-        end
-    end
+makeTPBtn("Teleport to Leaderboards",230.116302,2.69999909,-75.8902664,{
+    -0.00973738823,-2.36319622e-08,-0.999952614,
+    -4.74597783e-09,1,-2.35868676e-08,
+    0.999952614,4.51607862e-09,-0.00973738823
 })
-
-
